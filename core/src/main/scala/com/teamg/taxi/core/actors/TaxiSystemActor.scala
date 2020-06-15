@@ -34,7 +34,7 @@ class TaxiSystemActor(config: SimulationConfig)
   implicit val clock: Clock = Clock.system(ZoneId.of("Europe/Warsaw"))
   private lazy val orderAllocationManager = context.actorOf(Props(classOf[OrderAllocationManagerActor], clock))
   private lazy val taxiActors: Map[String, ActorRef] =
-    config.taxis.map(entry => entry._1 -> context.actorOf(Props(classOf[ResourceActor], clock, entry._2, orderAllocationManager)))
+    config.taxis.map(entry => entry._1 -> context.actorOf(Props(classOf[ResourceActor], clock, entry._2, orderAllocationManager, config.cityMap)))
 
   private implicit val system: ActorSystem = ActorSystem("TaxiSystem")
   private implicit val materializer: Materializer = Materializer(context)
@@ -57,7 +57,7 @@ class TaxiSystemActor(config: SimulationConfig)
     api.Taxi(taxi.id, api.Location(taxi.defaultNode.location.x, taxi.defaultNode.location.y), api.TaxiState.Free)
   }
 
-  system.scheduler.scheduleWithFixedDelay(1 second, 3 seconds)(() => taxiActors.foreach(entry => entry._2 ! GetTaxiStateM))
+  system.scheduler.scheduleWithFixedDelay(1 second, 10 seconds)(() => taxiActors.foreach(entry => entry._2 ! GetTaxiStateM))
   system.scheduler.scheduleWithFixedDelay(1 second, 3 seconds)(() => taxiActors.foreach(entry => entry._2 ! UpdateLocationM(config.stepSize)))
   system.scheduler.scheduleOnce(1 second)(orderAllocationManager ! SendTaxis(taxiActors))
 
