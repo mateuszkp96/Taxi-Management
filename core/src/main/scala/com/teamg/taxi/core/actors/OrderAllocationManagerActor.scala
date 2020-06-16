@@ -28,15 +28,11 @@ class OrderAllocationManagerActor(config: SimulationConfig,
   implicit val eqTaxiType: Eq[TaxiType] = Eq.fromUniversalEquals
   private var taxiActors: Map[String, ActorRef] = Map.empty
   private var taxiStates: Map[String, TaxiPureState] = Map.empty
-  //  private var taxiCost: Map[String, Option[Double]] = Map.empty
 
   private var orderActors: Map[String, ActorRef] = Map.empty
 
   private val orders: mutable.Map[String, Order] = mutable.Map.empty
 
-  def ordering(orderRequest: (String, OrderRequest)) = orderRequest._2.time
-
-  //  private val ordersQueue: mutable.PriorityQueue[OrderRequest] = mutable.PriorityQueue(Seq.empty[OrderRequest]: _*)(Ordering.by(ordering))
   private val ordersmap: mutable.Map[String, OrderRequest] = mutable.Map(Seq.empty[(String, OrderRequest)]: _*)
 
   private val actorSystem = ActorSystem("OrderAllocationManager")
@@ -160,13 +156,7 @@ class OrderAllocationManagerActor(config: SimulationConfig,
   override def receive: Receive = {
     case ArrivedOrderM(order: Order) =>
       orders(order.id) = order
-      for {
-        filtered <- getPossibleTaxisByType(order.taxiType)
-        bids <- getBidsFromActors(order, filtered.keys.toList)
-        chosenActor <- choseActor(bids)
-      } yield sendOrderToTaxi(order, chosenActor)
       val timeToDecision = getTimeToDecision(order)
-      //      ordersQueue += OrderRequest(timeToDecision.toEpochMilli, order)
       ordersmap(order.id) = OrderRequest(timeToDecision.toEpochMilli, order)
       println("ORDERS map: " + ordersmap)
 //      for {
