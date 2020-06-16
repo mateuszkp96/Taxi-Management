@@ -13,7 +13,8 @@ import scala.util.{Failure, Success}
 
 class HttpTaxiStateSystemReceiver(url: Uri)
                                  (implicit actorSystem: ActorSystem)
-  extends TaxiStateSystemReceiver with LazyLogging{
+  extends TaxiStateSystemReceiver
+    with LazyLogging {
 
   import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 
