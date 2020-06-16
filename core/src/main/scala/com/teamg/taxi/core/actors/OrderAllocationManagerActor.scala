@@ -71,7 +71,7 @@ class OrderAllocationManagerActor(config: SimulationConfig,
 
   }
 
-  actorSystem.scheduler.scheduleAtFixedRate(10 seconds, 100 seconds)(() => scheduleTaxis())
+  actorSystem.scheduler.scheduleAtFixedRate(10 seconds, 10 seconds)(() => scheduleTaxis())
 
   private def scheduleTaxis(): Future[List[Option[OrderRequest]]] = {
     val orderBidsFuture = reorderRequests(ordersmap.toMap)
