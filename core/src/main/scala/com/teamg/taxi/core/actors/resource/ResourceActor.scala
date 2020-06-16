@@ -34,13 +34,13 @@ class ResourceActor(clock: Clock,
       orderAllocationManagerActor ! onNewOrderRequest(order)
 
     case CalculateCostM(order) =>
-      taxiState match {
+      val cost = taxiState match {
         case TaxiState.Free(nodeId) =>
-          val cost = cityMap.minimalDistance(nodeId, order.from)
-          orderAllocationManagerActor ! TaxiCostResponse(taxi, cost)
-        case _: TaxiState.Occupied =>
-        case _: TaxiState.OnWayToCustomer =>
+          cityMap.minimalDistance(nodeId, order.from)
+        case _: TaxiState.Occupied => None
+        case _: TaxiState.OnWayToCustomer => None
       }
+      sender ! TaxiCostResponse(taxi, cost)
   }
 
   private def onUpdateLocation(dist: Double): Option[TaxiUpdateResponse] = {
@@ -65,7 +65,7 @@ class ResourceActor(clock: Clock,
             println("NEW EDGES TO CUSTOMER")
             println(edges.map(_.map(_.label.value)).get)
             taxiState = TaxiState.Occupied(order, TaxiPath(edges.get))
-            Some(TaxiPickUpCustomerM(taxi))
+            Some(TaxiPickUpCustomerM(taxi, order.id))
           case TaxiPathState.InProgress =>
 //            log.info(s"${taxi.id} is on the way to customer, course id: [${order.id}] ${order.customerType}, location: ${location.show}")
             None
@@ -79,7 +79,7 @@ class ResourceActor(clock: Clock,
         if (order.from === nodeId) {
           val startEdges = cityMap.edges(order.from, order.target)
           taxiState = TaxiState.Occupied(order, TaxiPath(startEdges.get))
-          TaxiOrderResponse.TaxiPickUpCustomerM(taxi)
+          TaxiOrderResponse.TaxiPickUpCustomerM(taxi, order.id)
         } else {
           val startEdges = cityMap.edges(nodeId, order.from)
           println(startEdges.map(_.map(_.label.value)).get)

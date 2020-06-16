@@ -19,7 +19,7 @@ object Main extends App {
   Thread.sleep(3000)
   val orderSender = new SimulationOrderSender(ServiceConfig.orderUrl)
 
-  orderSender.send(OrderRequest("A", "J", "normal", "normal"))(ec)
+  orderSender.send(OrderRequest("I", "S", "normal", "normal", "abc"))(ec)
 
 
 }

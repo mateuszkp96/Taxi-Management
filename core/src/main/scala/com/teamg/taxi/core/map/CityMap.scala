@@ -40,9 +40,6 @@ class CityMap[ID](graph: Graph[Node[ID], WLUnDiEdge]) {
   }
 
   private def edgesOnPath(fromId: ID, toId: ID): Option[List[Edge[ID]]] = {
-    val nodes = shortestPath(fromId, toId).map(_.nodes.map(_.value).toList)
-
-    println(nodes)
     val path = shortestPath(fromId, toId)
       .map {
         _.edges.map { e =>
@@ -52,27 +49,25 @@ class CityMap[ID](graph: Graph[Node[ID], WLUnDiEdge]) {
         }.toList
       }
 
-//    val initialEdge = Edge(Label.empty, Node(fromId, Location(0.0, 0.0)), Node(fromId, Location(0.0, 0.0)), 0.0)
-
     val firstEdge = path.map(_.head).get
-
     val properFirstEdge = if (firstEdge.first.id === fromId) {
       firstEdge
     } else {
       createEdge(firstEdge.second, firstEdge.first, firstEdge.weight)
     }
 
-    path.map(list => list.drop(1).scanLeft(properFirstEdge)((prev, edge) =>
-      if (prev.second.id === edge.first.id) {
-        edge
+    path.map { list =>
+      list.drop(1).scanLeft(properFirstEdge) { (prev, edge) =>
+        if (prev.second.id === edge.first.id) {
+          edge
+        }
+        else if (prev.second.id === edge.second.id) {
+          createEdge(edge.second, edge.first, edge.weight)
+        } else {
+          edge
+        }
       }
-      else if (prev.second.id === edge.second.id) {
-        createEdge(edge.second, edge.first, edge.weight)
-      } else {
-        edge
-      }
-    )
-    )
+    }
   }
 
   private def createEdge(first: Node[ID], second: Node[ID], weight: Double): Edge[ID] = {

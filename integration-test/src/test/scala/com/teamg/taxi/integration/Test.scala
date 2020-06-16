@@ -34,7 +34,7 @@ class Test extends WordSpec
         Thread.sleep(5000)
 
         for {
-          _ <- orderSender.send(OrderRequest("A", "J", "normal", "normal"))(ec)
+          _ <- orderSender.send(OrderRequest("A", "J", "normal", "normal", "car"))(ec)
         } yield ()
 
 //        orderSender.send(OrderRequest("A", "J", "normal", "normal"))(ec)
