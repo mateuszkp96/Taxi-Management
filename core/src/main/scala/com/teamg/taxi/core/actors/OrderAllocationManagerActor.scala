@@ -71,9 +71,9 @@ class OrderAllocationManagerActor(config: SimulationConfig,
 
   }
 
-  actorSystem.scheduler.scheduleAtFixedRate(10 seconds, 100 seconds)(() => scheduleTaxis())
+  actorSystem.scheduler.scheduleAtFixedRate(10 seconds, 10 seconds)(() => scheduleTaxis())
 
-  private def scheduleTaxis(): Future[List[Unit]] = {
+  private def scheduleTaxis(): Future[List[Option[OrderRequest]]] = {
     val orderBidsFuture = reorderRequests(ordersmap.toMap)
       .map(entry => entry._1 -> entry._2.order)
       .map(entry => getBids(entry._2).map(bids => OrderBids(entry._2, bids))).toList
@@ -82,13 +82,13 @@ class OrderAllocationManagerActor(config: SimulationConfig,
       .map(_.toList)
       .map(list => assignToTaxis(list))
       .map { taxiOrders =>
-        taxiOrders.map(orderTaxi => sendOrderToTaxi(orderTaxi._2, orderTaxi._1)).toList
+        taxiOrders.map(orderTaxi => orderTaxi._1 -> sendOrderToTaxi(orderTaxi._2, orderTaxi._1))
+          .map(tuple => ordersmap.remove(tuple._1)).toList
       }
   }
 
   private def getBids(order: Order): Future[Map[String, Double]] = {
     for {
-
       filtered <- getPossibleTaxisByType(order.taxiType)
       bids <- getBidsFromActors(order, filtered.keys.toList)
     } yield bids

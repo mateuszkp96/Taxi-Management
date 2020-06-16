@@ -16,35 +16,23 @@ object SchedulingHelper {
     val supervip = 100
   }
 
-  def assignToTaxis(list: List[OrderBids]): Map[String, Order] = { // taxi -> Order
+  def assignToTaxis(list: List[OrderBids]): Map[String, Order] = {
     val dummy: List[(Order, String)] = list
       .map(orderBids => orderBids.order -> orderBids.bids.minBy(_._2))
       .map(a => (a._1, a._2._1))
 
+//    val dummyAssign = dummy
+//      .groupBy(_._2)
+//      .filter(entry => entry._2.size == 1)
+//      .flatMap(a => a._2)
+//      .map(_.swap)
+
     val dummyAssign = dummy
       .groupBy(_._2)
-      .filter(entry => entry._2.size == 1)
-      .flatMap(a => a._2)
+      .map(_._2.head)
       .map(_.swap)
 
     dummyAssign
-    //    val taxiAndPossibleOffers =
-    //      list
-    //        .flatMap(orderBid => orderBid.bids.map(bid => bid._1 -> (orderBid.order, bid._2)))
-    //        .groupBy(_._1)
-    //        .mapValues(_.map(_._2))
-
-    //    val abc: List[(Order, String, Double)] =
-    //      list
-    //        .flatMap(orderBid => orderBid.bids.map(bid => (orderBid.order, bid._1, bid._2)))
-    //
-    //    val taxiOrdersPairs =
-    //      taxiAndPossibleOffers.flatMap(value => value._2.map(orderBid => (value._1, orderBid._1, orderBid._2))).toList
-    //
-    //    // teraz potrzeba przefiltrowac
-    //
-    //    taxiOrdersPairs.filter()
-    //  }
   }
 
   def getTimeToDecision(order: Order): Instant = {
